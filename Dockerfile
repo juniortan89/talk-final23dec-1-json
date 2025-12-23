@@ -1,8 +1,14 @@
 # clean base image containing only comfyui, comfy-cli and comfyui-manager
 FROM runpod/worker-comfyui:5.5.0-base
 
-# install custom nodes into comfyui
-# (no custom nodes declared in the provided workflow)
+# Install custom nodes for InfiniteTalk/WanVideo
+RUN cd /comfyui/custom_nodes && \
+    git clone https://github.com/kijai/ComfyUI-WanVideoWrapper.git && \
+    git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git
+
+# Install dependencies for custom nodes
+RUN cd /comfyui/custom_nodes/ComfyUI-WanVideoWrapper && pip install -r requirements.txt || true
+RUN cd /comfyui/custom_nodes/ComfyUI-VideoHelperSuite && pip install -r requirements.txt || true
 
 # download models into comfyui
 RUN comfy model download --url https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/InfiniteTalk/Wan2_1-InfiniteTalk-Single_fp8_e4m3fn_scaled_KJ.safetensors --relative-path models/diffusion_models --filename Wan2_1-InfiniteTalk-Single_fp8_e4m3fn_scaled_KJ.safetensors
@@ -13,6 +19,3 @@ RUN comfy model download --url https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_
 RUN comfy model download --url https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp16.safetensors --relative-path models/text_encoders --filename umt5_xxl_fp16.safetensors
 RUN comfy model download --url https://huggingface.co/Kijai/wav2vec2_safetensors/resolve/main/wav2vec2-chinese-base_fp16.safetensors --relative-path models/transformers/TencentGameMate --filename wav2vec2-chinese-base_fp16.safetensors
 RUN comfy model download --url https://huggingface.co/Kijai/MelBandRoFormer_comfy/resolve/main/MelBandRoformer_fp32.safetensors --relative-path models/diffusion_models --filename MelBandRoformer_fp32.safetensors
-
-# copy all input data (like images or videos) into comfyui (uncomment and adjust if needed)
-# COPY input/ /comfyui/input/
